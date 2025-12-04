@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Interactive Arts & Ideas Map</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #222;
+    }
+
+    .map-wrapper {
+      position: relative;
+      max-width: 1200px;
+      width: 95%;
+    }
+
+    .map-wrapper img {
+      width: 100%;
+      display: block;
+    }
+
+    /* Clickable spots */
+    .pin {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background: #ff69b4; /* pink pins */
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Special green pin for links */
+    .pin-green {
+      background: #00c853; /* green */
+    }
+
+    /* Popup note */
+    .note {
+      position: absolute;
+      min-width: 260px;
+      max-width: 480px;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      display: none;
+      z-index: 10;
+    }
+
+    .note h2 {
+      margin: 0 0 4px;
+      font-size: 14px;
+    }
+
+    .note p {
+      margin: 0 0 8px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .note .close {
+      position: absolute;
+      top: 4px;
+      right: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* Media inside popup (image + iframe for video) */
+    .note img,
+    .note iframe {
+      max-width: 100%;
+      display: none; /* only shown when needed */
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+
+    .note img {
+      cursor: pointer; /* hint that it's clickable for fullscreen */
+      height: auto;
+    }
+
+    .note iframe {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+    }
+
+    /* Fullscreen overlay for focusing on image */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    }
+  </style>
+</head>
+<body>
+  <div class="map-wrapper">
+    <!-- MAIN MAP IMAGE – matches your file name -->
+    <img src="map.png" alt="Arts and Ideas Map" />
+
+    <!-- Reusable popup -->
+    <div class="note" id="note">
+      <span class="close" id="note-close">&times;</span>
+      <h2 id="note-title"></h2>
+      <p id="note-text"></p>
+      <img id="note-image" alt="">
+      <iframe id="note-video" allow="autoplay" frameborder="0" allowfullscreen></iframe>
+    </div>
+
+        <!-- this is for andrea  -->
+    <div class="pin"
+         style="top: 90%; left: 10%;"
+         data-title="this is for andrea - linking to Google Doc"
+         data-text="ill delate tomorrow after the 11 meeting"
+        data-link="https://docs.google.com/document/d/1kh3OAN0tQlUr8vBbNe5a3KdaaN6_crlnqnWwmHl5QCU/edit?tab=t.0">
+    </div>
+
+     <!-- Arts & Ideas green pin -->
+    <div class="pin pin-green"
+         style="top: 36%; left: 18%;"
+         data-title="Arts & Ideas"
+         data-text="“Arts & Ideas” links Princeton University scholarship and campus life to the work and artists at McCarter.">
+    </div>
+
+    <!-- McCarter Theatre & Princeton University -->
+    <div class="pin"
+         style="top: 52%; left: 46.5%;"
+         data-title="McCarter Theatre & Princeton University"
+         data-text="McCarter Theatre & Princeton University"
+         data-video="https://drive.google.com/file/d/1ZGYvCr2xZN8whhSWx7MBbNDvpnswAKSt/preview">
+    </div>
+
+    <!-- Jadwin Gym / Stadium: Athletics Collaboration - Wolves -->
+    <div class="pin"
+     style="top: 75%; left: 83%;"
+     data-title="Jadwin Gym – Arts and Athletics: The Wolves"
+     data-text="“What a special evening, highlighting common ground between athletics and the arts. The play highlights how important it is for young people to be known and be challenged with respect, and also laughter and space to be themselves. What a thrill to bring together student-athletes, peer leaders and performers. These experiences have ripple effects.” - Dept of Athletics"
+     data-img="jadwin-wolves-collaboration.jpg">
+    </div>
+
+    <!-- Music Dept / LCA: Scholars Insights & Co-Productions -->
+    <div class="pin"
+     style="top: 62%; left: 50%;"
+     data-title="Music Dept / LCA – Scholars Insights & Co-Productions"
+     data-text="- Scholars Insights pre-show talks with faculty and co-productions like Noli Timere (Arts meets Engineering).<br>- Arts Meets Engineering: a post-show conversation with artists and engineers from PU's CreativeX team."
+     data-img="music-lca-noli-timere.jpg">
+    </div>
+
+    <!-- Frist Health Center: Manic Monologues -->
+    <div class="pin"
+     style="top: 60%; left: 69%;"
+     data-title="Frist Health Center – Manic Monologues"
+     data-text="McCarter partnered with CPS to launch “The Manic Monologues”, an interactive virtual theatre experience focused on reducing stigma around mental health. The project won prestigious academic and entertainment industry awards.<br><a href='https://manicmonologuesproduction.netlify.app/' target='_blank' rel='noopener noreferrer'>https://manicmonologuesproduction.netlify.app/</a>"
+     data-img="frist-health-manic-monologues.jpg">
+    </div>
+
+    <!-- ODUS – Passport to the Performing Arts -->
+    <div class="pin"
+         style="top: 50%; left: 69%;"
+         data-title="ODUS – Passport to the Performing Arts"
+         data-text="Passport to the Arts, sponsored by ODUS, allows undergraduate and graduate students to attend world-class performances on campus at no charge. This easy, welcoming access invites students to explore new art forms, find balance amid academic life, and build a sense of belonging in the campus community."
+         data-img="odus-frist-passport-marlie.jpg">
+    </div>
+
+    <!-- Passport testimonial -->
+    <div class="pin"
+         style="top: 50%; left: 71%;"
+         data-title="Marlie’s Testimonial"
+         data-text="Marlie Kass ’27, a Princeton junior and passionate theater maker, shared her experiences with Passport and her McCarter fellowship.<br>McCarter offers both summer and year-round fellowships for Princeton students interested in theater-making, providing opportunities to participate in rehearsals, explore script analysis, and engage in research."
+         data-video="https://drive.google.com/file/d/1idB8KMLMaXxEswZb-8X8VSZoBZajbCsl/preview">
+    </div>
+            
+    <!-- Art Museum: Opening Collaboration & Co-commissioned Dance Performance -->
+    <div class="pin"
+         style="top: 43%; left: 61%;"
+         data-title="Art Museum – Opening Collaboration & Dance Co-Commission"
+         data-text="McCarter brought live performances to the 24-Hour Open House at the newly re-opened Art Museum — including a Storytelling Salon and a Broadway cabaret, and is currently co-commissioning an original Dance performance there in 2026."
+         data-img="art-museum-dance-cocommission.jpg">
+    </div>
+    
+    <!-- Mathey College: Curated Group Outings / Amaya Taylor -->
+    <div class="pin"
+     style="top: 31%; left: 51%;"
+     data-title="Mathey College – Curated Group Outings"
+     data-text="Everyone was thrilled to see McCarter's musical “I & You” - a Broadway-level performance just minutes away from campus, and the opportunity to meet and talk with the lead actor. The experience encouraged us to engage further with the broader community in Princeton! - 
+      Amaya Taylor '28, Arts Committee Chair for Mathey College"
+     data-img="mathey-curated-outings-amaya.jpg">
+    </div>
+    
+    <!-- Clio Hall: GradFutures – The Scholar’s Take Essay Program (Ipsita) -->
+    <div class="pin"
+         style="top: 36.7%; left: 59%;"
+         data-title="Clio Hall – GradFUTURES: The Scholar’s Take"
+         data-text="Collaborating with McCarter has been an incredible growth opportunity. I discovered ways to bring academic knowledge to a wider audience, and how my skills and scholarship can be in conversation with the wider world.” - Ipsita Dey, PhD, Anthropology ‘24"
+         data-img="clio-hall-ipsita-scholar-take.jpg">
+    </div>
+    
+    <!-- E-Quad #1: McCarter / PU students / AI -->
+    <div class="pin"
+         style="top: 31%; left: 89%;"
+         data-title="E-Quad – AI Collaboration"
+         data-text="Keller student entrepreneurs are collaborating with McCarter Theatre to use interactive AI-powered technology to enhance audience engagement for the current stage production."
+         data-img="equad-ai-collaboration.jpg">
+    </div>
+    
+    <!-- E-Quad #2: The Scholar's Take – Siena Dumas Ang on "I & You" -->
+    <div class="pin"
+         style="top: 31%; left: 91.5%;"
+         data-title="E-Quad – The Scholar’s Take: Siena Dumas Ang"
+         data-text="At its core, I & You is a story about connection… What begins as a high school love story based on collaboration and shared experience; moves through poetry, music, and physical touch; and culminates in body and pulse. - Siena Dumas Ang GS, QCB"
+         data-img="equad-siena-dumas-ang.jpg">
+    </div>
+
+    <!-- Graduate College: Yangyou’s testimonial video (image + text) -->
+    <div class="pin"
+         style="top: 48%; left: 88%;"
+         data-title="Graduate College – Yangyou’s testimonial"
+         data-text="Yangyou’s testimonial about the Graduate College experience and its connection to Arts & Ideas at McCarter."
+         data-video="https://drive.google.com/file/d/16Dj_RKW3P9r2DJ7CeASsXjfd67mIdjl0/preview">
+    </div>
+
+    <!-- Nassau Hall: Alumni / Faculty-Staff / FFW -->
+    <div class="pin"
+         style="top: 27.5%; left: 61%;"
+         data-title="Nassau Hall – Alumni & Faculty/Staff Engagement"
+         data-text="Princeton Professor Patricia Smith (&#39;25 National Book Award Winner) joined artists on stage and led a talkback after a McCarter concert. Programming here also includes alumni events, faculty/staff engagement and benefits, and First-Year Families Weekend (FFW) events such as PWN and talkbacks."
+         data-img="nassau-hall-alumni-ffw.jpg">
+    </div>
+
+    <!-- Nassau Hall #2: Backstage meetups -->
+    <div class="pin"
+         style="top: 27.5%; left: 59%;"
+         data-title="Nassau Hall – Backstage Meetups"
+         data-text="Backstage meetups: an RGS-led outing at McCarter followed by a backstage photo-op with artists and VIPs, creating memorable connections between students, performers, and campus partners."
+         data-img="nassau-hall-backstage-meetups.jpg">
+    </div>
+
+    <!-- Fullscreen image overlay -->
+    <div class="overlay" id="image-overlay">
+      <img id="overlay-image" alt="">
+    </div>
+  </div> <!-- closes .map-wrapper -->
+
+  <script>
+    const pins = document.querySelectorAll('.pin');
+    const note = document.getElementById('note');
+    const noteTitle = document.getElementById('note-title');
+    const noteText = document.getElementById('note-text');
+    const noteImage = document.getElementById('note-image');
+    const noteVideo = document.getElementById('note-video');
+    const noteClose = document.getElementById('note-close');
+
+    const overlay = document.getElementById('image-overlay');
+    const overlayImage = document.getElementById('overlay-image');
+
+    pins.forEach(pin => {
+      pin.addEventListener('click', () => {
+        // If this pin has a link, open it in a new tab and skip the popup
+        const link = pin.dataset.link;
+        if (link) {
+          window.open(link, '_blank', 'noopener,noreferrer');
+          return;
+        }
+
+        const rect = pin.getBoundingClientRect();
+        const parentRect = pin.parentElement.getBoundingClientRect();
+
+        // Set text
+        noteTitle.textContent = pin.dataset.title || '';
+        noteText.innerHTML = pin.dataset.text || '';
+
+        const videoUrl = pin.dataset.video;
+        const imgFile = pin.dataset.img;
+
+        // Decide what to show: video first, then image
+        if (videoUrl) {
+          // Show embedded video (Drive, YouTube, etc.)
+          noteVideo.src = videoUrl;
+          noteVideo.style.display = 'block';
+
+          // Hide image
+          noteImage.style.display = 'none';
+          noteImage.src = '';
+        } else if (imgFile) {
+          // Show image
+          noteImage.src = imgFile;
+          noteImage.style.display = 'block';
+
+          // Hide video
+          noteVideo.style.display = 'none';
+          noteVideo.src = '';
+        } else {
+          // No media
+          noteImage.style.display = 'none';
+          noteImage.src = '';
+          noteVideo.style.display = 'none';
+          noteVideo.src = '';
+        }
+
+        // Position popup near the pin
+        const top = ((rect.top - parentRect.top) / parentRect.height) * 100;
+        const left = ((rect.left - parentRect.left) / parentRect.width) * 100;
+
+        note.style.top = `calc(${top}% - 10px)`;
+        note.style.left = `calc(${left}% + 20px)`;
+        note.style.display = 'block';
+      });
+    });
+
+    noteClose.addEventListener('click', () => {
+      note.style.display = 'none';
+      noteVideo.src = ''; // stop Drive video
+    });
+
+    // Hide popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!note.contains(e.target) && !e.target.classList.contains('pin')) {
+        note.style.display = 'none';
+        noteVideo.src = ''; // stop Drive video
+      }
+    });
+
+    // When you click the small image in the note, show it big
+    noteImage.addEventListener('click', () => {
+      if (!noteImage.src) return;
+      overlayImage.src = noteImage.src;
+      overlay.style.display = 'flex';
+    });
+
+    // Click anywhere on the dark overlay to close it
+    overlay.addEventListener('click', () => {
+      overlay.style.display = 'none';
+      overlayImage.src = '';
+    });
+  </script>
+</body>
+</html>

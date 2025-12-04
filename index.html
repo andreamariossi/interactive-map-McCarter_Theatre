@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Arts & Ideas Map</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #1a1a1a;
+      color: #333;
+    }
+
+    .map-wrapper {
+      position: relative;
+      max-width: 1200px;
+      width: 95%;
+      margin: 20px auto;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .map-wrapper img {
+      width: 100%;
+      display: block;
+      height: auto;
+    }
+
+    /* Clickable spots */
+    .pin {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      background: #ff69b4;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      transition: all 0.2s ease;
+      box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.7);
+      z-index: 5;
+    }
+
+    .pin:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+      box-shadow: 0 0 0 8px rgba(255, 105, 180, 0);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 105, 180, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(255, 105, 180, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 105, 180, 0);
+      }
+    }
+
+    /* Special green pin for links */
+    .pin-green {
+      background: #00c853;
+    }
+
+    .pin-green:hover {
+      animation: pulse-green 1.5s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(0, 200, 83, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 200, 83, 0);
+      }
+    }
+
+    /* Popup note */
+    .note {
+      position: absolute;
+      min-width: 280px;
+      max-width: 500px;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 15px 18px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 20;
+      border-left: 5px solid #ff69b4;
+    }
+
+    .note.pin-green-note {
+      border-left-color: #00c853;
+    }
+
+    .note h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: #222;
+      font-weight: 600;
+    }
+
+    .note p {
+      margin: 0 0 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .note a {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .note a:hover {
+      text-decoration: underline;
+    }
+
+    .note .close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #777;
+      background: none;
+      border: none;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.2s;
+    }
+
+    .note .close:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    /* Media inside popup */
+    .note-media-container {
+      margin-top: 12px;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 6px;
+    }
+
+    .note-img,
+    .note-video {
+      max-width: 100%;
+      display: none;
+    }
+
+    .note-img {
+      width: 100%;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .note-img:hover {
+      transform: scale(1.02);
+    }
+
+    .note-video {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      border: none;
+    }
+
+    /* Fullscreen overlay for focusing on image */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      cursor: pointer;
+    }
+
+    .overlay img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+      object-fit: contain;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .note {
+        min-width: 240px;
+        max-width: 85vw;
+        padding: 12px 15px;
+      }
+      
+      .pin {
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .note {
+        min-width: 200px;
+      }
+      
+      .note h2 {
+        font-size: 16px;
+      }
+      
+      .note p {
+        font-size: 13px;
+      }
+    }
+    
+    /* Loading state for map image */
+    .map-loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #222;
+      color: #fff;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="map-wrapper">
+    <!-- Loading state -->
+    <div class="map-loader" id="map-loader">
+      Loading map...
+    </div>
+    
+    <!-- MAIN MAP IMAGE -->
+    <img src="images/map.png" alt="Arts and Ideas Map" onload="document.getElementById('map-loader').style.display='none'" />
+
+    <!-- Reusable popup -->
+    <div class="note" id="note">
+      <button class="close" id="note-close" aria-label="Close popup">&times;</button>
+      <h2 id="note-title"></h2>
+      <p id="note-text"></p>
+      <div class="note-media-container">
+        <img class="note-img" id="note-image" alt="">
+        <iframe class="note-video" id="note-video" allow="autoplay; fullscreen" frameborder="0" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- PINS - positions adjusted for better responsiveness -->
+    
+    <!-- this is for andrea  -->
+    <div class="pin"
+         style="top: 90%; left: 10%;"
+         data-title="For Andrea - Linking to Google Doc"
+         data-text="Ill delete tomorrow after the 11 meeting"
+         data-link="https://docs.google.com/document/d/1kh3OAN0tQlUr8vBbNe5a3KdaaN6_crlnqnWwmHl5QCU/edit?tab=t.0">
+    </div>
+
+    <!-- Arts & Ideas green pin -->
+    <div class="pin pin-green"
+         style="top: 36%; left: 18%;"
+         data-title="Arts & Ideas"
+         data-text="“Arts & Ideas” links Princeton University scholarship and campus life to the work and artists at McCarter.<br>Co-sponsored by the Princeton University Humanities Council. Explore: <a href='https://www.mccarter.org/artsideas' target='_blank' rel='noopener noreferrer'>www.mccarter.org/artsideas</a>">
+    </div>
+
+    <!-- JRR presentation -->
+    <div class="pin"
+         style="top: 27.5%; left: 72%;"
+         data-title="McCarter Theatre & Princeton University"
+         data-text="GradFutures Live-Presentation 12/4/25: Business Skills for PhDs in Academia and Beyond!">
+    </div>
+  
+    <!-- McCarter Theatre & Princeton University -->
+    <div class="pin"
+         style="top: 52%; left: 46.5%;"
+         data-title="McCarter Theatre & Princeton University"
+         data-text="McCarter Theatre & Princeton University"
+         data-video="https://drive.google.com/file/d/1ZGYvCr2xZN8whhSWx7MBbNDvpnswAKSt/preview">
+    </div>
+
+    <!-- Jadwin Gym / Stadium: Athletics Collaboration - Wolves -->
+    <div class="pin"
+         style="top: 75%; left: 83%;"
+         data-title="Jadwin Gym – Arts and Athletics: The Wolves"
+         data-text="“What a special evening, highlighting common ground between athletics and the arts. The play highlights how important it is for young people to be known and be challenged with respect, and also laughter and space to be themselves. What a thrill to bring together student-athletes, peer leaders and performers. These experiences have ripple effects.” - Dept of Athletics"
+         data-img="images/jadwin-wolves-collaboration.jpg">
+    </div>
+
+    <!-- Music Dept / LCA: Scholars Insights & Co-Productions -->
+    <div class="pin"
+         style="top: 62%; left: 50%;"
+         data-title="Music Dept / LCA – Scholars Insights & Co-Productions"
+         data-text="- Scholars Insights pre-show talks with faculty and co-productions like Noli Timere (Arts meets Engineering).<br>- Arts Meets Engineering: a post-show conversation with artists and engineers from PU's CreativeX team."
+         data-img="images/music-lca-noli-timere.jpg">
+    </div>
+
+    <!-- Frist Health Center: Manic Monologues -->
+    <div class="pin"
+         style="top: 60%; left: 69%;"
+         data-title="Frist Health Center – Manic Monologues"
+         data-text="McCarter partnered with CPS to launch “The Manic Monologues”, an interactive virtual theatre experience focused on reducing stigma around mental health. The project won prestigious academic and entertainment industry awards. <br><a href='https://manicmonologuesproduction.netlify.app/' target='_blank' rel='noopener noreferrer'>https://manicmonologuesproduction.netlify.app/</a>"
+         data-img="images/frist-health-manic-monologues.jpg">
+    </div>
+
+    <!-- ODUS – Passport to the Performing Arts -->
+    <div class="pin"
+         style="top: 50%; left: 69%;"
+         data-title="ODUS – Passport to the Performing Arts"
+         data-text="Passport to the Arts, sponsored by ODUS, allows undergraduate and graduate students to attend world-class performances on campus at no charge. This easy, welcoming access invites students to explore new art forms, find balance amid academic life, and build a sense of belonging in the campus community."
+         data-img="images/odus-frist-passport-marlie.jpg">
+    </div>
+
+    <!-- Passport testimonial -->
+    <div class="pin"
+         style="top: 50%; left: 71%;"
+         data-title="Marlie’s Testimonial"
+         data-text="Marlie Kass ’27, a Princeton junior and passionate theater maker, shared her experiences with Passport and her McCarter fellowship.<br>McCarter offers both summer and year-round fellowships for Princeton students interested in theater-making, providing opportunities to participate in rehearsals, explore script analysis, and engage in research."
+         data-video="https://drive.google.com/file/d/1idB8KMLMaXxEswZb-8X8VSZoBZajbCsl/preview">
+    </div>
+
+    <!-- Art Museum: Opening Collaboration & Co-commissioned Dance Performance -->
+    <div class="pin"
+         style="top: 43%; left: 61%;"
+         data-title="Art Museum – Opening Collaboration & Dance Co-Commission"
+         data-text="McCarter brought live performances to the 24-Hour Open House at the newly re-opened Art Museum — including a Storytelling Salon and a Broadway cabaret. <br>PUAM has co-commissioned a dance show to premier at McCarter Spring '26."
+         data-img="images/art-museum-dance-cocommission.jpg">
+    </div>
+    
+    <!-- Mathey College: Curated Group Outings / Amaya Taylor -->
+    <div class="pin"
+         style="top: 31%; left: 51%;"
+         data-title="Mathey College – Curated Group Outings"
+         data-text="Everyone was thrilled to see McCarter's musical “I & You” - a Broadway-level performance just minutes away from campus, and the opportunity to meet and talk with the lead actor. The experience encouraged us to engage further with the broader community in Princeton! - 
+      Amaya Taylor '28, Arts Committee Chair for Mathey College"
+         data-img="images/mathey-curated-outings-amaya.jpg">
+    </div>
+    
+    <!-- Clio Hall: GradFutures – The Scholar’s Take Essay Program (Ipsita) -->
+    <div class="pin"
+         style="top: 36.7%; left: 59%;"
+         data-title="Clio Hall – GradFUTURES: The Scholar's Take"
+         data-text="Collaborating with McCarter has been an incredible growth opportunity. I discovered ways to bring academic knowledge to a wider audience, and how my skills and scholarship can be in conversation with the wider world.” - Ipsita Dey, PhD, Anthropology ‘24"
+         data-img="images/clio-hall-ipsita-scholar-take.jpg">
+    </div>
+    
+    <!-- E-Quad #1: McCarter / PU students / AI -->
+    <div class="pin"
+         style="top: 31%; left: 89%;"
+         data-title="E-Quad – AI Collaboration"
+         data-text="Keller student entrepreneurs are collaborating with McCarter Theatre to use interactive AI-powered technology to enhance audience engagement for the current stage production."
+         data-img="images/equad-ai-collaboration.jpg">
+    </div>
+    
+    <!-- E-Quad #2: The Scholar's Take – Siena Dumas Ang on "I & You" -->
+    <div class="pin"
+         style="top: 31%; left: 91.5%;"
+         data-title="The Scholar's Take: Siena Dumas Ang on “I & You” | GradFUTURES"
+         data-text="Cross- disciplinary essays by students in response to experiences at McCarter:At its core,“I & You” is a story about connection… What begins as a high school love story based on collaboration and shared experience; moves through poetry, music, and physical touch; and culminates in body and pulse. - Siena Dumas Ang GS, QCB"
+         data-img="images/equad-siena-dumas-ang.jpg">
+    </div>
+
+    <!-- Graduate College: Yangyou's testimonial video -->
+    <div class="pin"
+         style="top: 48%; left: 88%;"
+         data-title="Graduate College – Yangyou's Testimonial"
+         data-text="Yangyou's testimonial about the Graduate College experience and its connection to Arts & Ideas at McCarter."
+         data-video="https://drive.google.com/file/d/16Dj_RKW3P9r2DJ7CeASsXjfd67mIdjl0/preview">
+    </div>
+
+    <!-- Nassau Hall: Alumni / Faculty-Staff / FFW -->
+    <div class="pin"
+         style="top: 27.5%; left: 61%;"
+         data-title="Nassau Hall – Alumni & Faculty/Staff Engagement"
+         data-text="Princeton Professor Patricia Smith ('25 National Book Award Winner) joined artists on stage and led a talkback after a McCarter concert. Programming here also includes alumni events, faculty/staff engagement and benefits, and First-Year Families Weekend (FFW) events such as PWN and talkbacks."
+         data-img="images/nassau-hall-alumni-ffw.jpg">
+    </div>
+
+    <!-- Nassau Hall #2: Backstage meetups -->
+    <div class="pin"
+         style="top: 27.5%; left: 59%;"
+         data-title="Nassau Hall – Backstage Meetups"
+         data-text="Backstage meetups: an RGS-led outing at McCarter followed by a backstage photo-op with artists and VIPs, creating memorable connections between students, performers, and campus partners."
+         data-img="images/nassau-hall-backstage-meetups.jpg">
+    </div>
+
+    <!-- Fullscreen image overlay -->
+    <div class="overlay" id="image-overlay">
+      <img id="overlay-image" alt="">
+    </div>
+  </div> <!-- closes .map-wrapper -->
+
+  <script>
+    // DOM elements
+    const pins = document.querySelectorAll('.pin');
+    const note = document.getElementById('note');
+    const noteTitle = document.getElementById('note-title');
+    const noteText = document.getElementById('note-text');
+    const noteImage = document.getElementById('note-image');
+    const noteVideo = document.getElementById('note-video');
+    const noteClose = document.getElementById('note-close');
+    const overlay = document.getElementById('image-overlay');
+    const overlayImage = document.getElementById('overlay-image');
+    
+    // Track active pin for better UX
+    let activePin = null;
+
+    // Function to position popup relative to pin
+    function positionPopup(pin, note) {
+      const rect = pin.getBoundingClientRect();
+      const parentRect = pin.parentElement.getBoundingClientRect();
+      const noteRect = note.getBoundingClientRect();
+      
+      // Calculate position based on pin location
+      const topPercent = ((rect.top - parentRect.top) / parentRect.height) * 100;
+      const leftPercent = ((rect.left - parentRect.left) / parentRect.width) * 100;
+      
+      // Default to positioning below and to the right of the pin
+      let noteTop = topPercent + 2;
+      let noteLeft = leftPercent + 2;
+      
+      // Check if popup would go off screen and adjust if needed
+      if (leftPercent > 50) {
+        // If pin is on the right side, position popup to the left
+        noteLeft = leftPercent - 2;
+        note.style.transform = 'translateX(-100%)';
+      } else {
+        note.style.transform = 'none';
+      }
+      
+      if (topPercent > 70) {
+        // If pin is near bottom, position popup above
+        noteTop = topPercent - 2;
+        note.style.transform += ' translateY(-100%)';
+      }
+      
+      note.style.top = `${noteTop}%`;
+      note.style.left = `${noteLeft}%`;
+    }
+
+    // Add click handlers to all pins
+    pins.forEach(pin => {
+      pin.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling to document
+        
+        // Reset any previously active pin
+        if (activePin) {
+          activePin.style.zIndex = '5';
+        }
+        
+        // Set this as active pin
+        activePin = pin;
+        activePin.style.zIndex = '15';
+        
+        // If this pin has a link, open it in a new tab and skip the popup
+        const link = pin.dataset.link;
+        if (link) {
+          window.open(link, '_blank', 'noopener,noreferrer');
+          return;
+        }
+
+        // Set text content
+        noteTitle.textContent = pin.dataset.title || '';
+        noteText.innerHTML = pin.dataset.text || '';
+
+        // Check for video or image
+        const videoUrl = pin.dataset.video;
+        const imgFile = pin.dataset.img;
+
+        // Decide what to show: video first, then image
+        if (videoUrl) {
+          // Show embedded video
+          noteVideo.src = videoUrl;
+          noteVideo.style.display = 'block';
+          noteImage.style.display = 'none';
+          noteImage.src = '';
+        } else if (imgFile) {
+          // Show image
+          noteImage.src = imgFile;
+          noteImage.style.display = 'block';
+          noteVideo.style.display = 'none';
+          noteVideo.src = '';
+        } else {
+          // No media
+          noteImage.style.display = 'none';
+          noteImage.src = '';
+          noteVideo.style.display = 'none';
+          noteVideo.src = '';
+        }
+
+        // Apply appropriate border color based on pin type
+        if (pin.classList.contains('pin-green')) {
+          note.classList.add('pin-green-note');
+        } else {
+          note.classList.remove('pin-green-note');
+        }
+
+        // Position and show the popup
+        positionPopup(pin, note);
+        note.style.display = 'block';
+      });
+    });
+
+    // Close button handler
+    noteClose.addEventListener('click', () => {
+      note.style.display = 'none';
+      noteVideo.src = ''; // Stop video playback
+      
+      // Reset active pin
+      if (activePin) {
+        activePin.style.zIndex = '5';
+        activePin = null;
+      }
+    });
+
+    // Hide popup when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!note.contains(e.target) && !e.target.classList.contains('pin')) {
+        note.style.display = 'none';
+        noteVideo.src = ''; // Stop video playback
+        
+        // Reset active pin
+        if (activePin) {
+          activePin.style.zIndex = '5';
+          activePin = null;
+        }
+      }
+    });
+
+    // When you click the small image in the note, show it big
+    noteImage.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent closing the note
+      if (!noteImage.src) return;
+      overlayImage.src = noteImage.src;
+      overlay.style.display = 'flex';
+    });
+
+    // Click anywhere on the dark overlay to close it
+    overlay.addEventListener('click', () => {
+      overlay.style.display = 'none';
+      overlayImage.src = '';
+    });
+    
+    // Handle Escape key to close popups
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        note.style.display = 'none';
+        overlay.style.display = 'none';
+        noteVideo.src = '';
+        
+        // Reset active pin
+        if (activePin) {
+          activePin.style.zIndex = '5';
+          activePin = null;
+        }
+      }
+    });
+    
+    // Make sure pins are visible after image loads
+    document.querySelector('.map-wrapper img').addEventListener('load', function() {
+      pins.forEach(pin => {
+        pin.style.visibility = 'visible';
+      });
+    });
+  </script>
+</body>
+</html>
