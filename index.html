@@ -87,6 +87,27 @@
       }
     }
 
+    /* Special blue pin */
+    .pin-blue {
+      background: #2F3192;
+    }
+
+    .pin-blue:hover {
+      animation: pulse-blue 1.5s infinite;
+    }
+
+    @keyframes pulse-blue {
+      0% {
+        box-shadow: 0 0 0 0 rgba(47, 49, 146, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(47, 49, 146, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(47, 49, 146, 0);
+      }
+    }
+
     /* Popup note */
     .note {
       position: absolute;
@@ -103,6 +124,10 @@
 
     .note.pin-green-note {
       border-left-color: #00c853;
+    }
+
+    .note.pin-blue-note {
+      border-left-color: #2F3192;
     }
 
     .note h2 {
@@ -203,6 +228,21 @@
       object-fit: contain;
     }
 
+    /* Loading state for map image */
+    .map-loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #222;
+      color: #fff;
+      z-index: 1;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .note {
@@ -214,6 +254,14 @@
       .pin {
         width: 20px;
         height: 20px;
+      }
+      
+      .note h2 {
+        font-size: 16px;
+      }
+      
+      .note p {
+        font-size: 13px;
       }
     }
 
@@ -229,21 +277,6 @@
       .note p {
         font-size: 13px;
       }
-    }
-    
-    /* Loading state for map image */
-    .map-loader {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #222;
-      color: #fff;
-      z-index: 1;
     }
   </style>
 </head>
@@ -268,26 +301,26 @@
       </div>
     </div>
 
-    <!-- PINS - positions adjusted for better responsiveness -->
+    <!-- Pins - positions adjusted for better responsiveness -->
     
     <!-- this is for andrea  -->
     <div class="pin"
          style="top: 90%; left: 10%;"
          data-title="For Andrea - Linking to Google Doc"
-         data-text="Ill delete tomorrow after the 11 meeting"
+         data-text="I'll delete tomorrow after the 11 meeting"
          data-link="https://docs.google.com/document/d/1kh3OAN0tQlUr8vBbNe5a3KdaaN6_crlnqnWwmHl5QCU/edit?tab=t.0">
     </div>
 
-    <!-- Arts & Ideas green pin -->
-    <div class="pin pin-green"
+    <!-- Arts & Ideas blue pin -->
+    <div class="pin pin-blue"
          style="top: 36%; left: 18%;"
          data-title="Arts & Ideas"
-         data-text="“Arts & Ideas” links Princeton University scholarship and campus life to the work and artists at McCarter.<br>Co-sponsored by the Princeton University Humanities Council. Explore: <a href='https://www.mccarter.org/artsideas' target='_blank' rel='noopener noreferrer'>www.mccarter.org/artsideas</a>">
+         data-text="“Arts & Ideas” links Princeton University scholarship and campus life to the work and artists at McCarter.<br>Co-sponsored by the Princeton University Humanities Council. <br>Explore: <a href='https://www.mccarter.org/artsideas' target='_blank' rel='noopener noreferrer'>www.mccarter.org/artsideas</a>">
     </div>
 
     <!-- JRR presentation -->
-    <div class="pin"
-         style="top: 27.5%; left: 72%;"
+    <div class="pin pin-green"
+         style="top: 27.5%; left: 75.5%;"
          data-title="McCarter Theatre & Princeton University"
          data-text="GradFutures Live-Presentation 12/4/25: Business Skills for PhDs in Academia and Beyond!">
     </div>
@@ -320,7 +353,7 @@
     <div class="pin"
          style="top: 60%; left: 69%;"
          data-title="Frist Health Center – Manic Monologues"
-         data-text="McCarter partnered with CPS to launch “The Manic Monologues”, an interactive virtual theatre experience focused on reducing stigma around mental health. The project won prestigious academic and entertainment industry awards. <br><a href='https://manicmonologuesproduction.netlify.app/' target='_blank' rel='noopener noreferrer'>https://manicmonologuesproduction.netlify.app/</a>"
+         data-text="McCarter partnered with CPS to launch "The Manic Monologues", an interactive virtual theatre experience focused on reducing stigma around mental health. The project won prestigious academic and entertainment industry awards. <br><a href='https://manicmonologuesproduction.netlify.app/' target='_blank' rel='noopener noreferrer'>https://manicmonologuesproduction.netlify.app/</a>"
          data-img="images/frist-health-manic-monologues.jpg">
     </div>
 
@@ -335,8 +368,8 @@
     <!-- Passport testimonial -->
     <div class="pin"
          style="top: 50%; left: 71%;"
-         data-title="Marlie’s Testimonial"
-         data-text="Marlie Kass ’27, a Princeton junior and passionate theater maker, shared her experiences with Passport and her McCarter fellowship.<br>McCarter offers both summer and year-round fellowships for Princeton students interested in theater-making, providing opportunities to participate in rehearsals, explore script analysis, and engage in research."
+         data-title="Marlie's Testimonial"
+         data-text="Marlie Kass '27, a Princeton junior and passionate theater maker, shared her experiences with Passport and her McCarter fellowship.<br>McCarter offers both summer and year-round fellowships for Princeton students interested in theater-making, providing opportunities to participate in rehearsals, explore script analysis, and engage in research."
          data-video="https://drive.google.com/file/d/1idB8KMLMaXxEswZb-8X8VSZoBZajbCsl/preview">
     </div>
 
@@ -352,16 +385,15 @@
     <div class="pin"
          style="top: 31%; left: 51%;"
          data-title="Mathey College – Curated Group Outings"
-         data-text="Everyone was thrilled to see McCarter's musical “I & You” - a Broadway-level performance just minutes away from campus, and the opportunity to meet and talk with the lead actor. The experience encouraged us to engage further with the broader community in Princeton! - 
-      Amaya Taylor '28, Arts Committee Chair for Mathey College"
+         data-text="Everyone was thrilled to see McCarter's musical "I & You" - a Broadway-level performance just minutes away from campus, and the opportunity to meet and talk with the lead actor. The experience encouraged us to engage further with the broader community in Princeton! - Amaya Taylor '28, Arts Committee Chair for Mathey College"
          data-img="images/mathey-curated-outings-amaya.jpg">
     </div>
     
-    <!-- Clio Hall: GradFutures – The Scholar’s Take Essay Program (Ipsita) -->
+    <!-- Clio Hall: GradFutures – The Scholar's Take Essay Program (Ipsita) -->
     <div class="pin"
          style="top: 36.7%; left: 59%;"
          data-title="Clio Hall – GradFUTURES: The Scholar's Take"
-         data-text="Collaborating with McCarter has been an incredible growth opportunity. I discovered ways to bring academic knowledge to a wider audience, and how my skills and scholarship can be in conversation with the wider world.” - Ipsita Dey, PhD, Anthropology ‘24"
+         data-text="Collaborating with McCarter has been an incredible growth opportunity. I discovered ways to bring academic knowledge to a wider audience, and how my skills and scholarship can be in conversation with the wider world." - Ipsita Dey, PhD, Anthropology '24"
          data-img="images/clio-hall-ipsita-scholar-take.jpg">
     </div>
     
@@ -376,8 +408,8 @@
     <!-- E-Quad #2: The Scholar's Take – Siena Dumas Ang on "I & You" -->
     <div class="pin"
          style="top: 31%; left: 91.5%;"
-         data-title="The Scholar's Take: Siena Dumas Ang on “I & You” | GradFUTURES"
-         data-text="Cross- disciplinary essays by students in response to experiences at McCarter:At its core,“I & You” is a story about connection… What begins as a high school love story based on collaboration and shared experience; moves through poetry, music, and physical touch; and culminates in body and pulse. - Siena Dumas Ang GS, QCB"
+         data-title="The Scholar's Take: Siena Dumas Ang on "I & You" | GradFUTURES"
+         data-text="Cross- disciplinary essays by students in response to experiences at McCarter:At its core,"I & You" is a story about connection… What begins as a high school love story based on collaboration and shared experience; moves through poetry, music, and physical touch; and culminates in body and pulse. - Siena Dumas Ang GS, QCB"
          data-img="images/equad-siena-dumas-ang.jpg">
     </div>
 
@@ -430,7 +462,6 @@
     function positionPopup(pin, note) {
       const rect = pin.getBoundingClientRect();
       const parentRect = pin.parentElement.getBoundingClientRect();
-      const noteRect = note.getBoundingClientRect();
       
       // Calculate position based on pin location
       const topPercent = ((rect.top - parentRect.top) / parentRect.height) * 100;
@@ -510,10 +541,11 @@
         }
 
         // Apply appropriate border color based on pin type
+        note.classList.remove('pin-green-note', 'pin-blue-note');
         if (pin.classList.contains('pin-green')) {
           note.classList.add('pin-green-note');
-        } else {
-          note.classList.remove('pin-green-note');
+        } else if (pin.classList.contains('pin-blue')) {
+          note.classList.add('pin-blue-note');
         }
 
         // Position and show the popup
